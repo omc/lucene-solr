@@ -34,6 +34,15 @@ import org.apache.lucene.util.OpenBitSet;
 import org.apache.solr.search.QueryParsing;
 import org.apache.solr.schema.FieldType;
 import org.apache.lucene.queryParser.ParseException;
+import org.apache.lucene.queryParser.ParseException;
+import org.apache.lucene.util.OpenBitSet;
+import org.apache.solr.common.SolrException;
+import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.search.QueryParsing;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.*;
 
 /**
  * TODO!
@@ -265,6 +274,7 @@ public class  FacetComponent extends SearchComponent
 
   private void countFacets(ResponseBuilder rb, ShardRequest sreq) {
     FacetInfo fi = rb._facetInfo;
+    SimpleOrderedMap mergedFacetDates = new SimpleOrderedMap();    //used for distributed facet_dates
 
     for (ShardResponse srsp: sreq.responses) {
       int shardNum = rb.getShardNum(srsp.getShard());
@@ -289,8 +299,30 @@ public class  FacetComponent extends SearchComponent
           dff.add(shardNum, (NamedList)facet_fields.get(dff.getKey()), dff.initialLimit);
         }
       }
-    }
 
+      SimpleOrderedMap facet_dates = (SimpleOrderedMap) facet_counts.get("facet_dates");
+      if (facet_dates != null) {
+        for (Object obj : facet_dates) { //go through each facet_date
+          Map.Entry<String, SimpleOrderedMap<String>> entry = (Map.Entry<String, SimpleOrderedMap<String>>) obj;
+          if (mergedFacetDates.get(entry.getKey()) == null) { //first time 'round won't have any merging, so add the whole lot
+            mergedFacetDates.add(entry.getKey(), entry.getValue());
+          }
+          else { //not the first time, so merge current 'entry' values with those in 'mergedFacetDates'
+            SimpleOrderedMap<String> existMap = (SimpleOrderedMap) mergedFacetDates.get(entry.getKey());
+            for (Map.Entry extent : existMap) {
+              final String extKey = extent.getKey().toString();
+              if (extKey.equals("gap") || extKey.equals("end") || extKey.equals("start"))
+                continue; //we can skip these as we are assuming a single request, therefore they must all be the same
+              Integer tomrg = (Integer) ((SimpleOrderedMap) entry.getValue()).get(extKey);
+              if (tomrg != null) { //can be null if times are skewed
+                extent.setValue(((Integer) extent.getValue()).intValue() + tomrg); //merge
+              }
+            }
+          }
+        }
+        rb.setFacetDates(mergedFacetDates);	//set newly-merged facet dates for finishStage
+      }
+    }
 
     //
     // This code currently assumes that there will be only a single
@@ -457,8 +489,8 @@ public class  FacetComponent extends SearchComponent
     }
 
     // TODO: facet dates & numbers
-    facet_counts.add("facet_dates", new SimpleOrderedMap());
     facet_counts.add("facet_ranges", new SimpleOrderedMap());
+    facet_counts.add("facet_dates", rb.getFacetDates() != null ? rb.getFacetDates() : new SimpleOrderedMap());
 
     rb.rsp.add("facet_counts", facet_counts);
 

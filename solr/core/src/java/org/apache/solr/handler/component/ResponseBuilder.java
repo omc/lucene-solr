@@ -70,6 +70,7 @@ public class ResponseBuilder
   private DocListAndSet results = null;
   private NamedList<Object> debugInfo = null;
   private RTimer timer = null;
+  private SimpleOrderedMap facetDates = null;
 
   private Query highlightQuery = null;
 
@@ -282,7 +283,14 @@ public class ResponseBuilder
   public void setTimer(RTimer timer) {
     this.timer = timer;
   }
-
+  
+  public void setFacetDates(SimpleOrderedMap fds) {
+    facetDates = fds;
+  }
+  
+  public SimpleOrderedMap getFacetDates() {
+    return facetDates;
+  }
 
   public static class GlobalCollectionStat {
     public final long numDocs;

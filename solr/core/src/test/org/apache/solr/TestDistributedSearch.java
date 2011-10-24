@@ -51,15 +51,15 @@ public class TestDistributedSearch extends BaseDistributedSearchTestCase {
 
 
     del("*:*");
-    indexr(id,1, i1, 100, tlong, 100,t1,"now is the time for all good men"
+    indexr(id,1, i1, 100, tlong, 100,t1,"now is the time for all good men", tdate, "2010-04-20T11:00:00Z"
             ,"foo_f", 1.414f, "foo_b", "true", "foo_d", 1.414d);
-    indexr(id,2, i1, 50 , tlong, 50,t1,"to come to the aid of their country."
+    indexr(id,2, i1, 50 , tlong, 50,t1,"to come to the aid of their country.", tdate, "2010-05-02T11:00:00Z"
     );
-    indexr(id,3, i1, 2, tlong, 2,t1,"how now brown cow"
+    indexr(id,3, i1, 2, tlong, 2,t1,"how now brown cow", tdate, "2010-05-03T11:00:00Z"
     );
-    indexr(id,4, i1, -100 ,tlong, 101,t1,"the quick fox jumped over the lazy dog"
+    indexr(id,4, i1, -100 ,tlong, 101,t1,"the quick fox jumped over the lazy dog", tdate, "2010-05-03T11:00:00Z"
     );
-    indexr(id,5, i1, 500, tlong, 500 ,t1,"the quick fox jumped way over the lazy dog"
+    indexr(id,5, i1, 500, tlong, 500 ,t1,"the quick fox jumped way over the lazy dog", tdate, "2010-05-05T11:00:00Z"
     );
     indexr(id,6, i1, -600, tlong, 600 ,t1,"humpty dumpy sat on a wall");
     indexr(id,7, i1, 123, tlong, 123 ,t1,"humpty dumpy had a great fall");
@@ -149,6 +149,8 @@ public class TestDistributedSearch extends BaseDistributedSearchTestCase {
     query("q","*:*", "rows",0, "facet","true", "facet.field",t1,"facet.limit",1);
     query("q","*:*", "rows",0, "facet","true", "facet.query","quick", "facet.query","all", "facet.query","*:*");
     query("q","*:*", "rows",0, "facet","true", "facet.field",t1, "facet.mincount",2);
+    query("q","*:*", "rows",100, "facet","true", "facet.date",tdate, "facet.date.other", "all", "facet.date.start","2010-05-01T11:00:00Z", "facet.date.gap","+1DAY", "facet.date.end","2010-05-20T11:00:00Z");
+    
 
     stress=0;  // turn off stress... we want to tex max combos in min time
     for (int i=0; i<25*RANDOM_MULTIPLIER; i++) {
