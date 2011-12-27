@@ -133,10 +133,11 @@ public class SolrDispatchFilter implements Filter
   }
 
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-    if( abortErrorMessage != null ) {
-      ((HttpServletResponse)response).sendError( 500, abortErrorMessage );
-      return;
-    }
+    // WEBSOLR-1: Don't let one bad core kill the server
+    //if( abortErrorMessage != null ) {
+    //  ((HttpServletResponse)response).sendError( 500, abortErrorMessage );
+    //  return;
+    //}
     
     if (this.cores == null) {
       ((HttpServletResponse)response).sendError( 503, "Server is shutting down" );
