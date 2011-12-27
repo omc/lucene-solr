@@ -313,6 +313,11 @@ public class CoreContainer
       }
       
       containerConfigFilename = cores.getConfigFile().getName();
+    
+      // WEBSOLR-2: Don't kill the entire server if there are initially no cores.
+      // if (cores.cores.isEmpty()){
+      //         throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, "No cores were created, please check the logs for errors");
+      //       }
       
       return cores;
     }
