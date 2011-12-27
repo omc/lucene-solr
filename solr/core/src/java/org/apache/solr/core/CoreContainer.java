@@ -288,6 +288,11 @@ public class CoreContainer
   public Properties getContainerProperties() {
     return containerProperties;
   }
+  
+  // WEBSOLR-3: Make some methods public, to validate schemas without disk 
+  public SolrResourceLoader getResourceLoader() {
+	  return this.loader;
+  }
 
   // Helper class to initialize the CoreContainer
   public static class Initializer {
