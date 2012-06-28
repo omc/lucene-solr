@@ -190,12 +190,32 @@ class ShardFieldSortedHitQueue extends PriorityQueue<ShardDoc> {
       break;
     case DOC:
       // TODO: we can support this!
-      throw new RuntimeException("Doc sort not supported");
+      comparator = comparatorOrderInShard();
+      break;
     default:
       comparator = comparatorNatural(fieldname);
       break;
     }
     return comparator;
+  }
+  
+  Comparator comparatorOrderInShard() {
+    return new Comparator() {
+      @Override
+      public final int compare(final Object o1, final Object o2) {
+        ShardDoc sd1 = (ShardDoc) o1;
+        ShardDoc sd2 = (ShardDoc) o2;
+        Comparable v1 = sd1.orderInShard;
+        Comparable v2 = sd2.orderInShard;
+        if (v1==v2)
+          return 0;
+        if (v1==null)
+          return 1;
+        if(v2==null)
+          return -1;
+        return -v1.compareTo(v2);
+      }
+    };
   }
 
   class ShardComparator implements Comparator {

@@ -192,17 +192,27 @@ public class HttpShardHandler extends ShardHandler {
     return null;
   }
 
-
+  /** returns a ShardResponse of the last response correlated with a ShardRequest.  This won't 
+   * return early if it runs into an error.  
+   **/
+  public ShardResponse takeCompletedIncludingErrors() {
+    return take(false);
+  }
+  
   /** returns a ShardResponse of the last response correlated with a ShardRequest,
    * or immediately returns a ShardResponse if there was an error detected
    */
   public ShardResponse takeCompletedOrError() {
+      return take(true);
+  }
+
+  private ShardResponse take(boolean bailOnError) {
     while (pending.size() > 0) {
       try {
         Future<ShardResponse> future = completionService.take();
         pending.remove(future);
         ShardResponse rsp = future.get();
-        if (rsp.getException() != null) return rsp; // if exception, return immediately
+        if (bailOnError && rsp.getException() != null) return rsp; // if exception, return immediately
         // add response to the response list... we do this after the take() and
         // not after the completion of "call" so we know when the last response
         // for a request was received.  Otherwise we might return the same

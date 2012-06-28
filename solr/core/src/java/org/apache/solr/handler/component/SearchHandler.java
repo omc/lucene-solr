@@ -271,17 +271,21 @@ public class SearchHandler extends RequestHandlerBase implements SolrCoreAware ,
           // the outgoing queue, send them out immediately (by exiting
           // this loop)
           while (rb.outgoing.size() == 0) {
-            ShardResponse srsp = shardHandler1.takeCompletedOrError();
+            ShardResponse srsp = rb.req.getParams().getBool(ShardParams.SHARDS_TOLERANT, false)? 
+                shardHandler1.takeCompletedIncludingErrors():
+                shardHandler1.takeCompletedOrError();
             if (srsp == null) break;  // no more requests to wait for
 
             // Was there an exception?  If so, abort everything and
             // rethrow
             if (srsp.getException() != null) {
-              shardHandler1.cancelAll();
-              if (srsp.getException() instanceof SolrException) {
-                throw (SolrException)srsp.getException();
-              } else {
-                throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, srsp.getException());
+              if(!rb.req.getParams().getBool(ShardParams.SHARDS_TOLERANT, false)) {              
+                shardHandler1.cancelAll();
+                if (srsp.getException() instanceof SolrException) {
+                  throw (SolrException)srsp.getException();
+                } else {
+                  throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, srsp.getException());
+                }
               }
             }
 
