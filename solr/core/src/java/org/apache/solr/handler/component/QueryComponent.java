@@ -1066,20 +1066,22 @@ public class QueryComponent extends SearchComponent
 
       assert(sreq.responses.size() == 1);
       ShardResponse srsp = sreq.responses.get(0);
-      SolrDocumentList docs = (SolrDocumentList)srsp.getSolrResponse().getResponse().get("response");
+			try {
+	      SolrDocumentList docs = (SolrDocumentList)srsp.getSolrResponse().getResponse().get("response");
 
-      String keyFieldName = rb.req.getSchema().getUniqueKeyField().getName();
+	      String keyFieldName = rb.req.getSchema().getUniqueKeyField().getName();
 
-      for (SolrDocument doc : docs) {
-        Object id = doc.getFieldValue(keyFieldName);
-        ShardDoc sdoc = rb.resultIds.get(id.toString());
-        if (sdoc != null) {
-          if (returnScores && sdoc.score != null) {
-              doc.setField("score", sdoc.score);
-          }
-          rb._responseDocs.set(sdoc.positionInResponse, doc);
-        }
-      }
+	      for (SolrDocument doc : docs) {
+	        Object id = doc.getFieldValue(keyFieldName);
+	        ShardDoc sdoc = rb.resultIds.get(id.toString());
+	        if (sdoc != null) {
+	          if (returnScores && sdoc.score != null) {
+	              doc.setField("score", sdoc.score);
+	          }
+	          rb._responseDocs.set(sdoc.positionInResponse, doc);
+	        }
+	      }
+			} catch (NullPointerException e) {}
     }
   }
 
