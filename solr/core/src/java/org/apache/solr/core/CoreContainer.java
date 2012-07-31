@@ -124,7 +124,7 @@ public class CoreContainer
   protected File configFile = null;
   protected String libDir = null;
   protected ClassLoader libLoader = null;
-  protected SolrResourceLoader loader = null;
+  public SolrResourceLoader loader = null;
   protected Properties containerProperties;
   protected Map<String ,IndexSchema> indexSchemaCache;
   protected String adminHandler;
