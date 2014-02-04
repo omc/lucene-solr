@@ -26,10 +26,10 @@
 /solr/package
 
 # can this be minimized?
-/solr/example/webapps/*
+# /solr/example/webapps/*
 /solr/example/logs/*.log
 /solr/example/**/data
-/solr/example/solr/lib
+# /solr/example/solr/lib
 /solr/example/solr/logs
 /solr/example/solr/zoo_data
 /solr/example/work/*
